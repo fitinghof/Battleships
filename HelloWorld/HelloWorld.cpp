@@ -17,10 +17,11 @@ int smallboat[2] = { 1,1 };
 
 const int boardsize = 10;
 int ships[boardsize][boardsize] = { 0 }; //the board
+int player2ships[boardsize][boardsize] = { 0 }; //the board
 
 int visualboard[boardsize][boardsize] = { 0 };
 
-int row,column;
+
 int hits = 0;
 int turns = 1;
 int shipnumber = 0;
@@ -40,6 +41,7 @@ std::string boat = "			       __/___\n			 _____/______|\n		 _______/_____\\_____
 
 //functions
 void fireandmark() {
+    int row, column;
     while (true) {
         row = 0;
         column = 0;
@@ -102,9 +104,9 @@ void print_board(int a[boardsize][boardsize]) {
     std::cout << "  a b c d e f g";
 	for (int i = 0; i < boardsize; i++) {
         if (i > 8) {
-            std::cout << "\n" << i + 1 << " ";
+            std::cout << "\n" << i + 1 << "  ";
         }
-        else std::cout << "\n" << i + 1 << "  ";        
+        else std::cout << "\n" << i + 1 << "   ";        
         for (int j = 0; j < boardsize; j++) {
            
             switch (a[i][j]){
@@ -164,9 +166,6 @@ void createship(int a[], int b) {
     while (true) {
         int z;
             z = rand() % 100;
-        if (z <= 50) { counter1++; }
-        else counter0++;
-        std::cout << z;
         if(z<=50) {
             for (int i = 0; i < (boardsize - a[0] + 1); i++) {
                 for (int j = 0; j < (boardsize - a[1] + 1); j++) {
@@ -248,14 +247,6 @@ void createship(int a[], int b) {
            
 
         }
-        std::cout << "\n";
-            for (int i = 0; i < boardsize; i++) {//debugging
-                std::cout << "\n";
-                for (int j = 0; j < boardsize; j++) {
-                    std::cout << ships[i][j] << " ";
-                }
-            };
-
             shipsplaced++;
             if (shipsplaced == b || listcounter == 0) {
                 return;
@@ -264,6 +255,72 @@ void createship(int a[], int b) {
         
     }
    
+}
+void createplayerboard(int a[], int b[boardsize][boardsize]) {
+    int row, column;
+    std::cout << "place a " << a[0] << "x" << a[1] << " ship, note: You will be placing the upper left slot of the ship";
+    print_board(player2ships);
+    while (true) {
+        while (true) {
+            row = 0;
+            column = 0;
+            std::cin >> input;
+
+            if (input.size() < 2) {
+                continue;
+            }
+
+            char colChar = input[0];
+            char rowChar = input[1];
+
+            int colIndex = -1;
+            for (int i = 0; i <= boardsize; ++i) {
+                if (alphabet[i] == colChar) {
+                    colIndex = i;
+                    break;
+                }
+            }
+
+            if (colIndex == -1) {
+                text_line_chooser = 1; // invalid input
+                continue;
+            }
+
+            int rowNumber = rowChar - '0';
+            if (input.length() == 3) {
+                rowNumber = (rowChar - '0') * 10 + (input[2] - '0');
+            }
+
+            row = rowNumber - 1; // Convert to 0-based index
+            column = colIndex;
+
+            if (row >= boardsize || column >= boardsize || row < 0 || column < 0) {
+                text_line_chooser = 1; // invalid input
+                continue;
+            }
+
+            break;
+        }
+        bool valid = true;
+        for (int i = 0; i < a[0]; i++) {
+            for (int j = 0; j < a[1]; j++) {
+                if (b[row + i][column + j] != 0 || (row + i) >= boardsize || (column + j) >= boardsize) {
+                    valid = false;
+                    std::cout << "slot is already occupied or you are trying to place a ship out of bounds, try again";
+                }
+
+            }
+        }
+        if (!valid) {
+            continue;
+        }
+        for (int i = 0; i < a[0]; i++) {
+            for (int j = 0; j < a[1]; j++) {
+                b[i][j] = 1;
+            }
+        }
+        return;
+    }
 }
 
 std::string inputstring = "n"; // input string
@@ -275,131 +332,131 @@ int namechoice; // used to store which character you choosed
 
 bool filefail = false; // used to indicate a file has failed loading, being created or similar
 
-class player {
-public:
-    std::string name;
-    int wins;
-    int losses;
-    player() : wins(0), losses(0) {}
+    class player {
+    public:
+        std::string name;
+        int wins;
+        int losses;
+        player() : wins(0), losses(0) {}
 
-};
+    };
 
-player newplayer; // temporary storage of plater data
-player player1;
-player player2;
+    player newplayer; // temporary storage of plater data
+    player player1;
+    player player2;
 
-void saveplayer(const player& p) {
+    void saveplayer(const player& p) {
 
-    std::ofstream playerfile(p.name + ".txt");
-    if (playerfile.is_open() && !p.name.empty()) {
-        playerfile << p.name << "\n" << p.wins << "\n" << p.losses;
-        playerfile.close();
-        std::cout << p.name << ": Save successfull\n";
+        std::ofstream playerfile(p.name + ".txt");
+        if (playerfile.is_open() && !p.name.empty()) {
+            playerfile << p.name << "\n" << p.wins << "\n" << p.losses;
+            playerfile.close();
+            std::cout << p.name << ": Save successfull\n";
+
+        }
+        else if (p.name.empty()) {
+            std::cout << "Player 2: No data to save, skipped\n";
+
+        }
+        else std::cout << p.name << " save failed, try again\n";
 
     }
-    else if (p.name.empty()) {
-        std::cout << "Player 2: No data to save, skipped\n";
+    void createplayer(player& p) {
+        std::cout << "Enter name\n";
 
-    }
-    else std::cout << p.name << " save failed, try again\n";
+        while (true) {
+            std::cin.ignore();
+            getline(std::cin, inputstring);
+            std::ofstream playerlist("playernames.txt", std::ios::app);
 
-}
-void createplayer(player& p) {
-    std::cout << "Enter name\n";
+            if (playerlist.is_open()) {
+                playerlist << inputstring << "\n";
+                playerlist.close();
 
-    while (true) {
-        std::cin.ignore();
-        getline(std::cin, inputstring);
-        std::ofstream playerlist("playernames.txt", std::ios::app);
+                std::ofstream playerfile(inputstring + ".txt");
 
-        if (playerlist.is_open()) {
-            playerlist << inputstring << "\n";
-            playerlist.close();
+                if (playerfile.is_open()) {
+                    p.name = inputstring;
+                    p.wins = 0;
+                    p.losses = 0;
+                    playerfile << p.name << "\n" << p.losses << "\n" << p.wins;
+                    playerfile.close();
+                    break;
+                }
+                else std::cout << "file creation failed, try again";
 
-            std::ofstream playerfile(inputstring + ".txt");
-
-            if (playerfile.is_open()) {
-                p.name = inputstring;
-                p.wins = 0;
-                p.losses = 0;
-                playerfile << p.name << "\n" << p.losses << "\n" << p.wins;
-                playerfile.close();
-                break;
             }
             else std::cout << "file creation failed, try again";
 
         }
-        else std::cout << "file creation failed, try again";
-
     }
-}
-void loadplayer(player& p) {
-    while (true) {
-        std::cout << "Which one is you? type the number.\n";
+    void loadplayer(player& p) {
         while (true) {
-            std::ifstream playerlist("playernames.txt", std::ios::in);
-            if (playerlist.is_open()) {
-                while (getline(playerlist, text)) {
-                    i++;
-                    names[i] = text;
-                    std::cout << i << " " << text << std::endl;
+            std::cout << "Which one is you? type the number.\n";
+            while (true) {
+                std::ifstream playerlist("playernames.txt", std::ios::in);
+                if (playerlist.is_open()) {
+                    while (getline(playerlist, text)) {
+                        i++;
+                        names[i] = text;
+                        std::cout << i << " " << text << std::endl;
+                    }
+                    playerlist.close();
+                    break;
                 }
-                playerlist.close();
-                break;
             }
-        }
 
-        //makes sure input is valid
-        while (true) {
-            filefail = false;
-            std::cin >> namechoice;
-            if (!std::cin.fail() && !(namechoice > i) && !(namechoice < 1)) {
+            //makes sure input is valid
+            while (true) {
+                filefail = false;
+                std::cin >> namechoice;
+                if (!std::cin.fail() && !(namechoice > i) && !(namechoice < 1)) {
+                    std::cin.clear();
+                    break;
+                }
                 std::cin.clear();
-                break;
+                std::cout << "invalid input, input must be a number listed on the screen.\n";
             }
-            std::cin.clear();
-            std::cout << "invalid input, input must be a number listed on the screen.\n";
-        }
 
-        std::cin.ignore((std::numeric_limits<std::streamsize>::max)(), '\n');
+            std::cin.ignore((std::numeric_limits<std::streamsize>::max)(), '\n');
 
-        //makes sure playerfile opens
-        int retries = 0;
-        while (true) {
-            std::ifstream playerfile(names[namechoice] + ".txt");
-            if (playerfile.is_open()) {
-                playerfile >> p.name >> p.wins >> p.losses;
-                break;
+            //makes sure playerfile opens
+            int retries = 0;
+            while (true) {
+                std::ifstream playerfile(names[namechoice] + ".txt");
+                if (playerfile.is_open()) {
+                    playerfile >> p.name >> p.wins >> p.losses;
+                    break;
 
 
-                retries++;
+                    retries++;
 
-                if (retries > 3) {
-                    std::cout << "opening playerfile failed. \nDo you want to create a new player?";
-                    std::cin >> input;
-                    while (true) {
+                    if (retries > 3) {
+                        std::cout << "opening playerfile failed. \nDo you want to create a new player?";
                         std::cin >> input;
-                        if (input == "Y" || input == "y" || input == "yes" || input == "Yes") {
-                            createplayer(player1);
-                            return;
+                        while (true) {
+                            std::cin >> input;
+                            if (input == "Y" || input == "y" || input == "yes" || input == "Yes") {
+                                createplayer(player1);
+                                return;
+                            }
+                            else if (input == "N" || input == "n" || input == "no" || input == "No") {
+                                filefail = true;
+                                break;
+                            }
+                            else std::cout << "invalid input try again";
                         }
-                        else if (input == "N" || input == "n" || input == "no" || input == "No") {
-                            filefail = true;
-                            break;
-                        }
-                        else std::cout << "invalid input try again";
                     }
                 }
+
+
             }
 
-
-        }
-
-        if (!filefail) { // if there isn't a filefail, this makes sure the loop isn't repeated
-            break;
+            if (!filefail) { // if there isn't a filefail, this makes sure the loop isn't repeated
+                break;
+            }
         }
     }
-}
 
 /*
 ______       _   _   _           _     _           
@@ -446,12 +503,27 @@ int main() {
        createship(cruiser, 3);
        createship(destroyer,4);       
        createship(smallboat,5);
-        std::cout << counter0 << " " << counter1;//debugging
+
+       createplayerboard(carrier,player2ships);
+       createplayerboard(cruiser, player2ships);
+       createplayerboard(cruiser, player2ships);
+       createplayerboard(cruiser, player2ships);
+
+       createplayerboard(destroyer, player2ships);
+       createplayerboard(destroyer, player2ships);
+       createplayerboard(destroyer, player2ships);
+       createplayerboard(destroyer, player2ships);
+
+       createplayerboard(smallboat, player2ships);
+       createplayerboard(smallboat, player2ships);
+       createplayerboard(smallboat, player2ships);
+       createplayerboard(smallboat, player2ships);
+       createplayerboard(smallboat, player2ships);
 
         shipnumber = 0;
         shipcounter();
 		while (hits < shipnumber) {
-			//clear_screen();
+			clear_screen();
             std::cout << "Turn:" << turns << "\nYou need to sink " << shipnumber << " ships to win!\n\n";
 			print_hit_result();
 
