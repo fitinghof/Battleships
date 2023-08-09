@@ -104,13 +104,13 @@ void print_board() {
 		for (int j = 0; j < boardsize; j++) {
             switch (visualboard[i][j]){
             case 0: 
-                std::cout << 0;
+                std::cout << 0 << " ";
                 break;
             case 1:
-                std::cout << "X";
+                std::cout << "X ";
                 break;
             case 2: 
-                std::cout << "B";
+                std::cout << "B ";
                 break;
             }
 		}
@@ -315,21 +315,20 @@ int counter1 = 0;
 
 void createship(int a[], int b) {
 
-    srand(static_cast<unsigned>(time(NULL)));
+    
     int shipsplaced = 0;
     bool valid = true;
     int validslot[2][boardsize * boardsize * 5]{};
     int listcounter = 0;
-    while (true) {
-        valid = true;
+    while (true) {       
         for (int i = 0; i < (boardsize - a[0] + 1); i++) {
             for (int j = 0; j < (boardsize - a[1] + 1); j++) {
+                valid = true;
                 if (ships[i][j] == 0) {
                     for (int k = 0; k < a[0]; k++) {
-                        for (int L = 0; L < a[1]; L++) {
-                            if (!(ships[i + k][j+L] == 0) ) {
-                                valid = false;
-                                break;
+                        for (int l = 0; l < a[1]; l++) {
+                            if (!(ships[i + k][j+l] == 0) ) {
+                                valid = false;                               
                             }
                         }
                     }
@@ -337,31 +336,37 @@ void createship(int a[], int b) {
                         validslot[0][listcounter] = i;
                         validslot[1][listcounter] = j;
                         listcounter++;
-                    }
+                    }                   
                 }
-                else {
-                    valid = false; break;
+                else if (ships[i][j]==1) {
+                continue;
                 }
                
-            }
-            if (!valid) {
-                break;
-            }
+            }                   
 
         }
-        std::cout << listcounter;//debugging
-        int x = rand() % listcounter;
-        for (int i = 0; i < (a[0]); i++) {
-            for (int j = 0; j < a[1]; j++) {
-                ships[validslot[0][x]+i][validslot[1][x]+j]=1;
+
+      
+            std::cout << listcounter << "\n";//debugging
+            int x = rand() % listcounter;
+            for (int i = 0; i < (a[0]); i++) {
+                for (int j = 0; j < a[1]; j++) {
+                    ships[validslot[0][x] + i][validslot[1][x] + j] = 1;
+                }
             }
-        }
+            for (int i = 0; i < boardsize; i++) {
+                std::cout << "\n";
+                for (int j = 0; j < boardsize; j++) {
+                    std::cout << ships[i][j] << " ";
+                }
+            };
+
+            shipsplaced++;
+            if (shipsplaced == b || listcounter == (boardsize * boardsize - 2) || listcounter == 0) {
+                return;
+            }
+            listcounter = 0;
         
-        shipsplaced++;
-        if (shipsplaced == b || listcounter == boardsize * boardsize - 2) {
-            break;
-        }
-       
     }
    
 }
@@ -519,6 +524,7 @@ ______       _   _   _           _     _
 */
 
 int main() {
+    srand(static_cast<unsigned>(time(NULL)));
 	while(true) {
     std::cout << "Have you played before? Y/N\n\n";
 
@@ -541,10 +547,10 @@ int main() {
     std::cin >> inputmenu;
 
 	if (inputmenu == 'C' || inputmenu == 'c') {
-        createship(carrier,3);
-        //createship(cruiser, 2);
-        //createship(destroyer,2);       
-        //createship(smallboat,3);
+        createship(carrier,1);
+        createship(cruiser, 2);
+        createship(destroyer,2);       
+        createship(smallboat,3);
        
 
         shipnumber = 0;
@@ -556,12 +562,7 @@ int main() {
 			print_hit_result();
 
 			print_board();
-            for (int i = 0; i < boardsize; i++) {
-                std::cout<<"\n";
-                for (int j = 0; j < boardsize; j++) {
-                    std::cout << ships[i][j] << " ";
-                }
-            };
+            
 
             std::cout << "\n\nYou have sunk " << hits << " out of " << shipnumber << " ships.\nPlease enter where to shoot\n\n";
 
