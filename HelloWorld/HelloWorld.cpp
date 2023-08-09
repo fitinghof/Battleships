@@ -7,11 +7,14 @@
 #include <fstream>
 #include <ctime>
 
+int counter1 = 0;//debugging
+int counter0 = 0;//debugging
 
-int carrier[2] = { 2,4 };
+int carrier[2] = { 2,4 }; //Different ship sizeas
 int cruiser[2] = { 1,3 };
 int destroyer[2] = { 1,2 };
 int smallboat[2] = { 1,1 };
+
 const int boardsize = 10;
 int ships[boardsize][boardsize] = { 0 }; //the board
 
@@ -25,9 +28,7 @@ int text_line_chooser = 0;
 
 char inputmenu;
 std::string input;
-char numbers[8] = {
-	'1','2','3','4','5','6','7','8'
-};
+
 char alphabet[25] = {
 	'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','x','y','z'
 };
@@ -96,13 +97,17 @@ void fireandmark() {
         turns++;
     }
 }
-void print_board() {
+void print_board(int a[boardsize][boardsize]) {
  
     std::cout << "  a b c d e f g";
 	for (int i = 0; i < boardsize; i++) {
-        std::cout <<"\n" << i+1 << " ";
-		for (int j = 0; j < boardsize; j++) {
-            switch (visualboard[i][j]){
+        if (i > 8) {
+            std::cout << "\n" << i + 1 << " ";
+        }
+        else std::cout << "\n" << i + 1 << "  ";        
+        for (int j = 0; j < boardsize; j++) {
+           
+            switch (a[i][j]){
             case 0: 
                 std::cout << 0 << " ";
                 break;
@@ -149,212 +154,102 @@ void print_hit_result() {
         std::cout << "You missed! Try again\n\n";
 	}
 }
-int counter1 = 0;
-/*void createship(int a[] = {}) {
-    while (true) {
-        counter1++;
-        srand((unsigned)time(NULL));
-        int z = rand() % 2;
-
-        if (z == 1) {
-            std::swap(a[1], a[0]);
-        }
-
-        int maxX = 8 - a[0];
-        int maxY = 8 - a[1];
-        int x = rand() % (maxX + 1);
-        int y = rand() % (maxY + 1);
-
-       
-        bool canPlace = true;
-        for (int i = 0; i < a[0]; i++) {
-            for (int j = 0; j < a[1]; j++) {
-                int row = x + i;
-                int col = y + j;
-
-                if (row < 0 || row >= boardsize-1 || col < 0 || col >= boardsize-1 || ships[row][col] != 0) {
-                    canPlace = false;
-                    break;
-                }
-            }
-            if (canPlace) {
-                for (int i = 0; i < a[0]; i++) {
-                    for (int j = 0; j < a[1]; j++) {
-                        ships[x + i][y + j] = 1;
-                    }
-                }
-                break;
-            }
-        }
-
-        if (canPlace) {           
-            break;
-        }
-    }
-}*/
-//reaaaaally slow createship function
-/*void createship(int a[], int b) {
-    srand(static_cast<unsigned>(time(NULL)));
-    int shipsplaced = 0;
-    bool canplaceship[boardsize][boardsize]{ true };
-    for (int i = 0; i < boardsize; i++) {//debugging
-        for (int j = 0; j < boardsize; j++) {
-            canplaceship[i][j] = true;
-        }
-    }
-    bool valid = true;
-    int canplaceshiplistY[boardsize * boardsize]{ 0 };
-    int canplaceshiplistX[boardsize * boardsize]{ 0 };
-
-    while (true) {
-        int listcounter = 0;
-        int z = rand() % 2;
-
-        if (z == 1) {
-            for (int i = 0; i < boardsize - a[1] + 1; i++) {
-                for (int j = 0; j < boardsize - a[0] + 1; j++) {
-                    if (!canplaceship[i][j]) {
-                        continue;
-                    }
-
-                    bool valid = true;
-                    for (int k = 0; k < a[1]; k++) {
-                        for (int l = 0; l < a[0]; l++) {
-                            if (!((i + k) < boardsize) || !((i + k) >= 0) || !(ships[i + k][j + l] == 0) || !((j + l) < boardsize) || !((j + l) >= 0)) {
-                                valid = false;
-                                break;
-                            }
-                        }
-                        if (!valid) {
-                            break;
-                        }
-                    }
-
-                    if (valid) {
-                        canplaceshiplistY[listcounter] = i;
-                        canplaceshiplistX[listcounter] = j;
-                        listcounter++;
-                    }
-                }
-            }
-        }
-        else {
-            for (int i = 0; i < boardsize - a[0] + 1; i++) {
-                for (int j = 0; j < boardsize - a[1] + 1; j++) {
-                    if (!canplaceship[i][j]) {
-                        continue;
-                    }
-
-                    bool valid = true;
-                    for (int k = 0; k < a[0]; k++) {
-                        for (int l = 0; l < a[1]; l++) {
-                            if (!((i + k) < boardsize) || !((i + k) >= 0) || !(ships[i + k][j + l] == 0) || !((j + l) < boardsize) || !((j + l) >= 0)) {
-                                valid = false;
-                                break;
-                            }
-                        }
-                        if (!valid) {
-                            break;
-                        }
-                       
-                    }
-                    if (valid) {
-                        canplaceshiplistY[listcounter] = i;
-                        canplaceshiplistX[listcounter] = j;
-                        listcounter++;
-                    }
-                }
-            }
-        }
-        if (!valid) {
-            continue;
-        }
-        if (listcounter == 0) {
-            std::cout << "Couldn't place anymore ships, not enough valid spaces, missing " << b - shipsplaced << " ships";
-            return;
-        }
-
-        int y = rand() % listcounter;
-
-        if (z == 1) {
-            for (int i = 0; i < a[1]; i++) {
-                for (int j = 0; j < a[0]; j++) {
-                    ships[canplaceshiplistY[y] + i][canplaceshiplistX[y] + j] = 1;
-                    canplaceship[canplaceshiplistY[y] + i][canplaceshiplistX[y] + j] = false;
-                }
-            }
-        }
-        else {
-            for (int i = 0; i < a[0]; i++) {
-                for (int j = 0; j < a[1]; j++) {
-                    ships[canplaceshiplistY[y] + i][canplaceshiplistX[y] + j] = 1;
-                    canplaceship[canplaceshiplistY[y] + i][canplaceshiplistX[y] + j] = false;
-                }
-            }
-        }
-       
-        for (int i = 0; i < boardsize; i++) {//debugging
-            std::cout << "\n";
-            for (int j = 0; j < boardsize; j++) {
-                std::cout << canplaceship[i][j];
-            }
-        }
-        shipsplaced++;
-        if (shipsplaced >= b) {
-            return;
-        }
-        for (int i = 0; i < boardsize * boardsize; i++) {
-                canplaceshiplistX[i]=0;
-                canplaceshiplistY[i]=0;          
-        }
-    }
-}
-*/
-//reaaaaaally fucked create ship function, but fast
-
-
 void createship(int a[], int b) {
 
-    
+    srand(static_cast<unsigned>(time(NULL)));
     int shipsplaced = 0;
     bool valid = true;
     int validslot[2][boardsize * boardsize * 5]{};
     int listcounter = 0;
-    while (true) {       
-        for (int i = 0; i < (boardsize - a[0] + 1); i++) {
-            for (int j = 0; j < (boardsize - a[1] + 1); j++) {
-                valid = true;
-                if (ships[i][j] == 0) {
-                    for (int k = 0; k < a[0]; k++) {
-                        for (int l = 0; l < a[1]; l++) {
-                            if (!(ships[i + k][j+l] == 0) ) {
-                                valid = false;                               
+    while (true) {
+        int z;
+            z = rand() % 100;
+        if (z <= 50) { counter1++; }
+        else counter0++;
+        std::cout << z;
+        if(z<=50) {
+            for (int i = 0; i < (boardsize - a[0] + 1); i++) {
+                for (int j = 0; j < (boardsize - a[1] + 1); j++) {
+                    valid = true;
+                    if (ships[i][j] == 0) {                      
+                        for (int k = 0; k < a[0]; k++) {
+                            for (int l = 0; l < a[1]; l++) {
+                                if (!(ships[i + k][j + l] == 0)) {
+                                    valid = false;
+                                    continue;
+                                }
                             }
+
+                        }
+                        if (!valid) {
+                            continue;
+                        }
+                        if (valid) {
+                            validslot[0][listcounter] = i;
+                            validslot[1][listcounter] = j;
+                            listcounter++;
                         }
                     }
-                    if (valid) {
-                        validslot[0][listcounter] = i;
-                        validslot[1][listcounter] = j;
-                        listcounter++;
-                    }                   
-                }
-                else if (ships[i][j]==1) {
-                continue;
-                }
-               
-            }                   
+                    else if (ships[i][j] == 1) {
+                        continue;
+                    }
 
+                }
+
+            }
         }
-
-      
-            std::cout << listcounter << "\n";//debugging
-            int x = rand() % listcounter;
+        if (z <= 50) {
+        int x = rand() % listcounter;
             for (int i = 0; i < (a[0]); i++) {
                 for (int j = 0; j < a[1]; j++) {
                     ships[validslot[0][x] + i][validslot[1][x] + j] = 1;
                 }
+            }       
+        }
+
+        if (z > 50) {
+            for (int i = 0; i < (boardsize - a[1] + 1); i++) {
+                for (int j = 0; j < (boardsize - a[0] + 1); j++) {
+                    valid = true;
+                    if (ships[i][j] == 0) {                    
+                        for (int k = 0; k < a[1]; k++) {
+                            for (int l = 0; l < a[0]; l++) {
+                                if (!(ships[i + k][j + l] == 0)) {
+                                    valid = false;
+                                    continue;
+                                }
+                            }
+
+                        }
+                        if (!valid) {
+                            continue;
+                        }
+                        if (valid) {
+                            validslot[0][listcounter] = i;
+                            validslot[1][listcounter] = j;
+                            listcounter++;
+                        }
+                    }
+                    else if (ships[i][j] == 1) {
+                        continue;
+                    }
+
+                }
+
             }
-            for (int i = 0; i < boardsize; i++) {
+        }
+        if (z > 50) {
+            int x = rand() % listcounter;
+                for (int i = 0; i < (a[1]); i++) {
+                    for (int j = 0; j < a[0]; j++) {
+                        ships[validslot[0][x] + i][validslot[1][x] + j] = 1;
+                    }
+                }
+           
+
+        }
+        std::cout << "\n";
+            for (int i = 0; i < boardsize; i++) {//debugging
                 std::cout << "\n";
                 for (int j = 0; j < boardsize; j++) {
                     std::cout << ships[i][j] << " ";
@@ -362,7 +257,7 @@ void createship(int a[], int b) {
             };
 
             shipsplaced++;
-            if (shipsplaced == b || listcounter == (boardsize * boardsize - 2) || listcounter == 0) {
+            if (shipsplaced == b || listcounter == 0) {
                 return;
             }
             listcounter = 0;
@@ -524,7 +419,7 @@ ______       _   _   _           _     _
 */
 
 int main() {
-    srand(static_cast<unsigned>(time(NULL)));
+
 	while(true) {
     std::cout << "Have you played before? Y/N\n\n";
 
@@ -547,21 +442,20 @@ int main() {
     std::cin >> inputmenu;
 
 	if (inputmenu == 'C' || inputmenu == 'c') {
-        createship(carrier,1);
-        createship(cruiser, 2);
-        createship(destroyer,2);       
-        createship(smallboat,3);
-       
+       createship(carrier,1);
+       createship(cruiser, 3);
+       createship(destroyer,4);       
+       createship(smallboat,5);
+        std::cout << counter0 << " " << counter1;//debugging
 
         shipnumber = 0;
         shipcounter();
 		while (hits < shipnumber) {
 			//clear_screen();
-            std::cout << counter1;
             std::cout << "Turn:" << turns << "\nYou need to sink " << shipnumber << " ships to win!\n\n";
 			print_hit_result();
 
-			print_board();
+			print_board(visualboard);
             
 
             std::cout << "\n\nYou have sunk " << hits << " out of " << shipnumber << " ships.\nPlease enter where to shoot\n\n";
